@@ -1,0 +1,16 @@
+volumes:
+  postgres_volume:
+    name: postgres_volume_rest_microservice
+services:
+  postgres:
+    hostname: postgres
+    image: postgres:13.1-alpine
+    container_name: postgres
+    ports:
+      - '5433:5432'
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin
+      - PGDATA=/var/postgresql/data/pgdata
+    volumes:
+      - postgres_volume:/var/postgresql/data/pgdata
