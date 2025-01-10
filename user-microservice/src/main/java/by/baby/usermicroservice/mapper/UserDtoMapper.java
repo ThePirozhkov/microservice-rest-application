@@ -10,7 +10,7 @@ import java.util.Optional;
 public class UserDtoMapper implements Mapper<UserDto, UserEntity> {
 
     @Override
-    public Optional<UserDto> mapToDto(UserEntity value) {
+    public UserDto mapToDto(UserEntity value) {
         return Optional.ofNullable(value)
                 .map(userEntity -> new UserDto(
                         userEntity.getId(),
@@ -18,11 +18,15 @@ public class UserDtoMapper implements Mapper<UserDto, UserEntity> {
                         userEntity.getAuthToken(),
                         userEntity.getMoney(),
                         userEntity.getCreatedAt()
-                ));
+                ))
+                .orElseThrow(() -> new RuntimeException("Can't map to UserDto"));
     }
 
     @Override
     public UserEntity mapToEntity(UserDto value) {
+        if (value == null) {
+            throw new RuntimeException("Can't map to UserEntity");
+        }
                     UserEntity userEntity = new UserEntity();
                     userEntity.setId(value.getId());
                     userEntity.setUsername(value.getUsername());

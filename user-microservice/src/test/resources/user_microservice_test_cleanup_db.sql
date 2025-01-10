@@ -1,0 +1,2 @@
+DELETE FROM user_entity;
+ALTER TABLE user_entity ALTER COLUMN id RESTART WITH 1;

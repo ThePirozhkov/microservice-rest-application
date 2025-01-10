@@ -1,5 +1,6 @@
 package by.baby.usermicroservice.dto;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -15,6 +16,7 @@ public final class UserDto {
     private Long money;
     private Date createdAt;
 
+    @JsonCreator
     public UserDto(String username, String authToken, Long money, Date createdAt) {
         this.username = username;
         this.authToken = authToken;

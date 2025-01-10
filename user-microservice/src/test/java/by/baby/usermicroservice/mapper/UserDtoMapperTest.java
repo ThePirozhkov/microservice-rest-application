@@ -26,7 +26,7 @@ public class UserDtoMapperTest {
         userEntity.setAuthToken("authToken");
         userEntity.setMoney(0L);
         userEntity.setCreatedAt(new Date());
-        assertThat(userDtoMapper.mapToDto(userEntity)).isNotEmpty();
+        assertThat(userDtoMapper.mapToDto(userEntity)).isNotNull();
     }
 
     @Test

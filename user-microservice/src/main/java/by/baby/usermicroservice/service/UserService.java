@@ -1,11 +1,12 @@
 package by.baby.usermicroservice.service;
 
 import by.baby.usermicroservice.dto.UserDto;
+import by.baby.usermicroservice.exception.UnableToUpdateUserException;
 import by.baby.usermicroservice.mapper.UserDtoMapper;
-import by.baby.usermicroservice.persistence.entity.UserEntity;
 import by.baby.usermicroservice.persistence.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserService implements by.baby.usermicroservice.service.Service<UserDto, Long> {
 
     private final UserRepository userRepository;
@@ -22,46 +24,38 @@ public class UserService implements by.baby.usermicroservice.service.Service<Use
     public List<UserDto> findAll() {
         return userRepository.findAll()
                 .stream()
-                .map(userEntity -> userDtoMapper.mapToDto(userEntity)
-                        .orElseThrow(() -> new RuntimeException("User not found")))
+                .map(userDtoMapper::mapToDto)
                 .collect(Collectors.toList());
     }
 
     @Override
     public Optional<UserDto> findById(Long id) {
-        return userDtoMapper.mapToDto(userRepository.findById(id)
-                        .orElseThrow(() -> new RuntimeException("User not found")));
+        return userRepository.findById(id)
+                .map(userDtoMapper::mapToDto);
     }
 
     @Override
     public UserDto save(UserDto dto) {
-        UserEntity userEntity = userRepository.save(userDtoMapper.mapToEntity(dto));
-        return userDtoMapper.mapToDto(userEntity)
-                .orElseThrow(() -> new RuntimeException("Unable to save user"));
+        return userDtoMapper.mapToDto(userRepository.save(userDtoMapper.mapToEntity(dto)));
     }
 
     @Override
-    public UserDto update(UserDto fromDto, UserDto toDto) {
-        UserEntity newDto = Optional.of(toDto)
-                .map(dto -> {
-                    dto.setUsername(fromDto.getUsername());
-                    dto.setAuthToken(fromDto.getAuthToken());
-                    dto.setMoney(fromDto.getMoney());
-                    dto.setCreatedAt(fromDto.getCreatedAt());
-                    return dto;
+    public UserDto update(UserDto dto, Long id) {
+        return userRepository.findById(id)
+                .map(userEntity -> {
+                    userEntity.setUsername(dto.getUsername());
+                    userEntity.setAuthToken(dto.getAuthToken());
+                    userEntity.setMoney(dto.getMoney());
+                    userEntity.setCreatedAt(dto.getCreatedAt());
+                    return userEntity;
                 })
-                .map(userDtoMapper::mapToEntity)
                 .map(userRepository::save)
-                .orElseThrow(() -> new RuntimeException("Unable to update user"));
-        return userDtoMapper.mapToDto(newDto)
-                .orElseThrow(() -> new RuntimeException("Unable to map user"));
+                .map(userDtoMapper::mapToDto)
+                .orElseThrow(() -> new UnableToUpdateUserException("Unable to update user"));
     }
 
     @Override
     public void deleteById(Long id) {
         userRepository.deleteById(id);
-        if (userRepository.existsById(id)) {
-            throw new RuntimeException("Unable to delete user");
-        }
     }
 }

@@ -1,24 +1,25 @@
 package by.baby.usermicroservice.persistence.repository;
 
-import by.baby.usermicroservice.UserMicroserviceApplication;
 import by.baby.usermicroservice.persistence.entity.UserEntity;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
-@SpringBootTest(classes = UserMicroserviceApplication.class)
+@DataJpaTest
 @ActiveProfiles("test")
+@Transactional
 public class UserRepositoryTest {
 
     @Autowired
     private UserRepository userRepository;
 
     @Test
-    void shouldCreateSaveAndFindUserSuccessfully() {
+    public void shouldCreateSaveAndFindUserSuccessfully() {
         UserEntity testUser = new UserEntity();
         testUser.setUsername("testUsername1");
         testUser.setAuthToken(UUID.randomUUID().toString());

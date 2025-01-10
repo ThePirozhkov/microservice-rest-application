@@ -11,7 +11,7 @@ public interface Service<T, V> {
 
     T save(T dto);
 
-    T update(T fromDto, T toDto);
+    T update(T dto, V id);
 
     void deleteById(V id);
 
