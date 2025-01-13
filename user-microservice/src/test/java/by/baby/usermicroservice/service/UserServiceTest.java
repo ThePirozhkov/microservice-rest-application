@@ -66,7 +66,7 @@ public class UserServiceTest {
     @Order(3)
     public void shouldSaveSuccessfully() {
         UserDto userDto = userService.save(new UserDto(
-                "username", "authToken", 0L, new Date()
+                "username", "authToken", 0L
         ));
         assertThat(userService.findById(userDto.getId())).isNotEmpty();
     }

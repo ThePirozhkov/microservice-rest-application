@@ -1,0 +1,19 @@
+server:
+  port: 0
+spring:
+  application:
+    name: "spring-configuration-server"
+  profiles:
+    active: native
+  cloud:
+    config:
+      server:
+        native:
+          search-locations: "classpath:/config"
+          fail-on-error: true
+eureka:
+  client:
+    service-url:
+      defaultZone: "http://localhost:8888/eureka"
+  instance:
+    instance-id: "spring-configuration-server"

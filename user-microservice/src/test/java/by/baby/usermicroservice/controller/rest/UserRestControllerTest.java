@@ -85,7 +85,7 @@ public class UserRestControllerTest {
     @Test
     public void shouldCreateUserSuccessfully() {
         UserDto userDto = new UserDto(
-                "createUserUsername", "authTokenCreateUserTest", 0L, new Date()
+                "createUserUsername", "authTokenCreateUserTest", 0L
         );
         String jsonUserDto = objectMapper.writeValueAsString(userDto);
         mockMvc.perform(MockMvcRequestBuilders.post("/user")
@@ -100,7 +100,7 @@ public class UserRestControllerTest {
     @Test
     public void shouldUpdateUserSuccessfully() {
         UserDto updUser = new UserDto(
-                "updateUserUsername", "authTokenUpdateUserTest", 0L, new Date()
+                "updateUserUsername", "authTokenUpdateUserTest", 0L
         );
         String jsonUpdUserDto = objectMapper.writeValueAsString(updUser);
         mockMvc.perform(MockMvcRequestBuilders.put("/user/" + user1.getId())
@@ -117,7 +117,7 @@ public class UserRestControllerTest {
     @Test
     public void shouldGetUserNotFoundExceptionForUpdate() {
         UserDto updUser = new UserDto(
-                "updateUserUsername", "authTokenUpdateUserTest", 0L, new Date()
+                "updateUserUsername", "authTokenUpdateUserTest", 0L
         );
         String jsonUpdUserDto = objectMapper.writeValueAsString(updUser);
         mockMvc.perform(MockMvcRequestBuilders.put("/user/3")

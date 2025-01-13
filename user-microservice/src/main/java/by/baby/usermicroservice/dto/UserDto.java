@@ -17,10 +17,9 @@ public final class UserDto {
     private Date createdAt;
 
     @JsonCreator
-    public UserDto(String username, String authToken, Long money, Date createdAt) {
+    public UserDto(String username, String authToken, Long money) {
         this.username = username;
         this.authToken = authToken;
         this.money = money;
-        this.createdAt = createdAt;
     }
 }

@@ -6,6 +6,7 @@
             <class name="by.baby.usermicroservice.mapper.UserDtoMapperTest"/>
             <class name="by.baby.usermicroservice.persistence.repository.UserRepositoryTest"/>
             <class name="by.baby.usermicroservice.service.UserServiceTest"/>
+            <class name="by.baby.usermicroservice.controller.rest.UserRestControllerTest"/>
         </classes>
     </test>
 </suite>

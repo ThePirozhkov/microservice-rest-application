@@ -1,0 +1,21 @@
+server:
+  port: 0
+spring:
+  datasource:
+    url: "jdbc:postgresql://localhost:5433/postgres"
+    username: "postgres"
+    password: "admin"
+    driver-class-name: "org.postgresql.Driver"
+  jpa:
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+    hibernate:
+      ddl-auto: "create"
+eureka:
+  client:
+    service-url:
+      defaultZone: "http://localhost:8888/eureka"
+  instance:
+    instance-id: "user-microservice-${random-value}"

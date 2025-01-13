@@ -1,0 +1,33 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: "spring-gateway-api"
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        - id: "user-microservice"
+          uri: "lb://USER-MICROSERVICE"
+          predicates:
+            - name: "Path"
+              args:
+                pattern: "/user/**"
+        - id: "configuration-server"
+          uri: "lb://SPRING-CONFIGURATION-SERVER"
+          predicates:
+                - name: "Path"
+                  args:
+                    pattern: "/config/**"
+          filters:
+                - name: "RewritePath"
+                  args:
+                    regexp: "/config/(?<segment>.*)/(?<profile>.*)"
+                    replacement: "/${segment}/${profile}"
+eureka:
+  client:
+    service-url:
+      defaultZone: "http://localhost:8888/eureka"
