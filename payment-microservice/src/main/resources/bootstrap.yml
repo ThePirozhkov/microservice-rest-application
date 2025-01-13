@@ -1,6 +1,6 @@
 spring:
   application:
-    name: "user-microservice"
+    name: "payment-microservice"
   config:
     import: "configserver:"
   cloud:
