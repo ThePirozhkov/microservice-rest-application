@@ -3,7 +3,7 @@ package by.baby.usermicroservice.controller.rest;
 import by.baby.usermicroservice.dto.UserDto;
 import by.baby.usermicroservice.exception.UnableToDeleteUserException;
 import by.baby.usermicroservice.exception.UserNotFoundException;
-import by.baby.usermicroservice.persistence.repository.UserRepository;
+import by.baby.persistence.repository.UserRepository;
 import by.baby.usermicroservice.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

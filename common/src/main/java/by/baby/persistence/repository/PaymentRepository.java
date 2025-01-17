@@ -1,0 +1,7 @@
+package by.baby.persistence.repository;
+
+import by.baby.persistence.entity.PaymentEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface PaymentRepository extends JpaRepository<Long, PaymentEntity> {
+}

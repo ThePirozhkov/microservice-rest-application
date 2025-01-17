@@ -1,8 +1,8 @@
 package by.baby.usermicroservice.controller.rest;
 
+import by.baby.persistence.entity.UserEntity;
 import by.baby.usermicroservice.dto.UserDto;
-import by.baby.usermicroservice.persistence.entity.UserEntity;
-import by.baby.usermicroservice.persistence.repository.UserRepository;
+import by.baby.persistence.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.*;

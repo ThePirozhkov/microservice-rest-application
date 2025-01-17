@@ -1,10 +1,11 @@
-package by.baby.usermicroservice.persistence.entity;
+package by.baby.persistence.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Check;
 
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Getter
@@ -29,6 +30,9 @@ public class UserEntity {
 
     @Column(nullable = false)
     private Date createdAt;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<PaymentEntity> payments;
 
     @PrePersist
     private void prePersist() {

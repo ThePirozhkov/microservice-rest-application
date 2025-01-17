@@ -3,7 +3,7 @@ package by.baby.usermicroservice.service;
 import by.baby.usermicroservice.dto.UserDto;
 import by.baby.usermicroservice.exception.UnableToUpdateUserException;
 import by.baby.usermicroservice.mapper.UserDtoMapper;
-import by.baby.usermicroservice.persistence.repository.UserRepository;
+import by.baby.persistence.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

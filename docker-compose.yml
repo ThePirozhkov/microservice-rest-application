@@ -16,6 +16,19 @@ services:
       - PGDATA=/var/postgresql/data/pgdata
     volumes:
       - postgres_volume:/var/postgresql/data/pgdata
+  liquibase:
+    image: liquibase/liquibase
+    volumes:
+      - ./db/changelog:/liquibase/db/changelog
+    command: ["liquibase",
+               "update",
+               "--changelog-file=db/changelog/db.changelog-master.yaml",
+               "--url=jdbc:postgresql://postgres:5432/postgres",
+               "--username=postgres",
+               "--password=admin"]
+#    entrypoint: [ "sh", "-c" ]
+#    command: [ "ls -la /liquibase/db/changelog" ]
+
   kafka_server1:
     hostname: kafka_server1
     image: bitnami/kafka:latest

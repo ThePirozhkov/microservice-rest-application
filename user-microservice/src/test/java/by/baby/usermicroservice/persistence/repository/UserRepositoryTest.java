@@ -1,6 +1,7 @@
 package by.baby.usermicroservice.persistence.repository;
 
-import by.baby.usermicroservice.persistence.entity.UserEntity;
+import by.baby.persistence.entity.UserEntity;
+import by.baby.persistence.repository.UserRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

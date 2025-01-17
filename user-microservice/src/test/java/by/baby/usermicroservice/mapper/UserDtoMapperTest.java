@@ -1,7 +1,7 @@
 package by.baby.usermicroservice.mapper;
 
+import by.baby.persistence.entity.UserEntity;
 import by.baby.usermicroservice.dto.UserDto;
-import by.baby.usermicroservice.persistence.entity.UserEntity;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

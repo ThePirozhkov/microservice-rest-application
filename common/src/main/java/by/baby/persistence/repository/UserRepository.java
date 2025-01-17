@@ -1,6 +1,6 @@
-package by.baby.usermicroservice.persistence.repository;
+package by.baby.persistence.repository;
 
-import by.baby.usermicroservice.persistence.entity.UserEntity;
+import by.baby.persistence.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
