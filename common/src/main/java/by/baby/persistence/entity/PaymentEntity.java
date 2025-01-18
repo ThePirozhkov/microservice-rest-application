@@ -1,17 +1,17 @@
 package by.baby.persistence.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.Date;
 
 @Entity
-@NoArgsConstructor
 @Getter
 @Setter
+@NoArgsConstructor
+@EqualsAndHashCode
+@ToString
 public class PaymentEntity {
 
     @Id
@@ -29,5 +29,10 @@ public class PaymentEntity {
 
     @Column(nullable = false)
     private Date paymentDate;
+
+    @PrePersist
+    private void onCreate() {
+        this.paymentDate = new Date();
+    }
 
 }
