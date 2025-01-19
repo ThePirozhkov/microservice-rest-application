@@ -5,12 +5,14 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
-@SpringBootApplication
-@EnableJpaRepositories(
-        basePackages = "by.baby.persistence.repository"
+@SpringBootApplication(
+        scanBasePackages = "by.baby"
 )
 @EntityScan(
-        basePackages = "by.baby.persistence.entity"
+        basePackages = "by.baby.entity"
+)
+@EnableJpaRepositories(
+        "by.baby.spring.components.repository"
 )
 public class PaymentMicroserviceApplication {
 

@@ -1,4 +1,4 @@
-package by.baby.persistence.entity;
+package by.baby.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

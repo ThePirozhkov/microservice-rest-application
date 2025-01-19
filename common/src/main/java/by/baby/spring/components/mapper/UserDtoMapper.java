@@ -1,7 +1,7 @@
-package by.baby.usermicroservice.mapper;
+package by.baby.spring.components.mapper;
 
-import by.baby.persistence.entity.UserEntity;
-import by.baby.usermicroservice.dto.UserDto;
+import by.baby.dto.UserDto;
+import by.baby.entity.UserEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;

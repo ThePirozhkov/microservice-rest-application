@@ -1,9 +1,9 @@
 package by.baby.paymentmicroservice.persistence.repository;
 
-import by.baby.persistence.entity.PaymentEntity;
-import by.baby.persistence.entity.UserEntity;
-import by.baby.persistence.repository.PaymentRepository;
-import by.baby.persistence.repository.UserRepository;
+import by.baby.entity.PaymentEntity;
+import by.baby.entity.UserEntity;
+import by.baby.spring.components.repository.PaymentRepository;
+import by.baby.spring.components.repository.UserRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

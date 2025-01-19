@@ -1,6 +1,6 @@
-package by.baby.persistence.repository;
+package by.baby.spring.components.repository;
 
-import by.baby.persistence.entity.UserEntity;
+import by.baby.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

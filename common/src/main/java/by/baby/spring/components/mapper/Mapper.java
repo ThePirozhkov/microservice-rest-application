@@ -1,4 +1,4 @@
-package by.baby.usermicroservice.mapper;
+package by.baby.spring.components.mapper;
 
 public interface Mapper<T, V> {
 

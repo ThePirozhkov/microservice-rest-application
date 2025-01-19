@@ -1,4 +1,4 @@
-package by.baby.usermicroservice.dto;
+package by.baby.dto;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.AllArgsConstructor;

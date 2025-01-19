@@ -1,9 +1,10 @@
-package by.baby.persistence.entity;
+package by.baby.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Check;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -32,7 +33,7 @@ public class UserEntity {
     private Date createdAt;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List<PaymentEntity> payments;
+    private List<PaymentEntity> payments = new ArrayList<>();
 
     @PrePersist
     private void prePersist() {
