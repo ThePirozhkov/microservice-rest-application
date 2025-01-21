@@ -1,4 +1,7 @@
 spring:
+  kafka:
+    producer:
+      transaction-id-prefix: "transfer-microservice-${random.value}-"
   application:
     name: "payment-microservice"
   config:

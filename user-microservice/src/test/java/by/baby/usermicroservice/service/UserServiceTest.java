@@ -3,6 +3,7 @@ package by.baby.usermicroservice.service;
 import by.baby.entity.UserEntity;
 import by.baby.dto.UserDto;
 import by.baby.spring.components.repository.UserRepository;
+import by.baby.spring.components.service.UserService;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

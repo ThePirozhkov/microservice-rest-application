@@ -1,13 +1,13 @@
 package by.baby.dto;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.util.Date;
 
-@Data
+@NoArgsConstructor
+@Getter
+@Setter
 @AllArgsConstructor
 public class PaymentDto {
 
@@ -17,10 +17,4 @@ public class PaymentDto {
     private BigDecimal amount;
     private Date paymentDate;
 
-    @JsonCreator
-    public PaymentDto(UserDto fromUser, UserDto toUser, BigDecimal amount) {
-        this.fromUser = fromUser;
-        this.toUser = toUser;
-        this.amount = amount;
-    }
 }

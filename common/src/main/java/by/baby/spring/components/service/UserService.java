@@ -1,7 +1,7 @@
-package by.baby.usermicroservice.service;
+package by.baby.spring.components.service;
 
 import by.baby.dto.UserDto;
-import by.baby.usermicroservice.exception.UnableToUpdateUserException;
+import by.baby.exception.UnableToUpdateException;
 import by.baby.spring.components.mapper.UserDtoMapper;
 import by.baby.spring.components.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class UserService implements by.baby.usermicroservice.service.Service<UserDto, Long> {
+public class UserService implements by.baby.spring.components.service.Service<UserDto, Long> {
 
     private final UserRepository userRepository;
     private final UserDtoMapper userDtoMapper;
@@ -46,12 +46,11 @@ public class UserService implements by.baby.usermicroservice.service.Service<Use
                     userEntity.setUsername(dto.getUsername());
                     userEntity.setAuthToken(dto.getAuthToken());
                     userEntity.setMoney(dto.getMoney());
-                    userEntity.setCreatedAt(dto.getCreatedAt());
                     return userEntity;
                 })
                 .map(userRepository::save)
                 .map(userDtoMapper::mapToDto)
-                .orElseThrow(() -> new UnableToUpdateUserException("Unable to update user"));
+                .orElseThrow(() -> new UnableToUpdateException("Unable to update user"));
     }
 
     @Override

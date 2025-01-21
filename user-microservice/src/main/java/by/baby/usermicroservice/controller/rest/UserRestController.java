@@ -1,10 +1,10 @@
 package by.baby.usermicroservice.controller.rest;
 
 import by.baby.dto.UserDto;
-import by.baby.usermicroservice.exception.UnableToDeleteUserException;
-import by.baby.usermicroservice.exception.UserNotFoundException;
+import by.baby.exception.UnableToDeleteException;
+import by.baby.exception.NotFoundException;
 import by.baby.spring.components.repository.UserRepository;
-import by.baby.usermicroservice.service.UserService;
+import by.baby.spring.components.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +28,7 @@ public class UserRestController {
     @GetMapping("/{id}")
     public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
         return ResponseEntity.ok(userService.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("Unable to find user by id: " + id)));
+                .orElseThrow(() -> new NotFoundException("Unable to find user by id: " + id)));
     }
 
     @PostMapping
@@ -40,7 +40,7 @@ public class UserRestController {
     public ResponseEntity<UserDto> updateUser(@PathVariable Long id,
                                               @RequestBody UserDto userDto) {
         if (!userRepository.existsById(id)) {
-            throw new UserNotFoundException("Unable to find user by id: " + id);
+            throw new NotFoundException("Unable to find user by id: " + id);
         }
         return ResponseEntity.ok(userService.update(userDto, id));
     }
@@ -50,9 +50,9 @@ public class UserRestController {
         if (userRepository.existsById(id)) {
             userService.deleteById(id);
         } else {
-            throw new UserNotFoundException("Unable to delete user by id: " + id);
+            throw new NotFoundException("Unable to delete user by id: " + id);
         }
-        if (userRepository.existsById(id)) throw new UnableToDeleteUserException("Unable to delete user by id: " + id);
+        if (userRepository.existsById(id)) throw new UnableToDeleteException("Unable to delete user by id: " + id);
         return ResponseEntity.noContent().build();
     }
 

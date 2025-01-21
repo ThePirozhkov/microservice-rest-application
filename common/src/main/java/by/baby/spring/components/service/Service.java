@@ -1,4 +1,4 @@
-package by.baby.usermicroservice.service;
+package by.baby.spring.components.service;
 
 import java.util.List;
 import java.util.Optional;
