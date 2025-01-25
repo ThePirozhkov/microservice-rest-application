@@ -1,5 +1,8 @@
 package by.baby.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,8 +23,13 @@ public final class UserDto {
     }
 
     private Long id;
+    @NotBlank
     private String username;
+    @NotBlank
     private String authToken;
+    @NotNull
+    @PositiveOrZero
     private Long money;
     private Date createdAt;
+
 }

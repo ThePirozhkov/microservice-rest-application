@@ -11,7 +11,7 @@ import java.util.Date;
 @AllArgsConstructor
 public class PaymentDto {
 
-    private Long id;
+    private String id;
     private UserDto fromUser;
     private UserDto toUser;
     private BigDecimal amount;

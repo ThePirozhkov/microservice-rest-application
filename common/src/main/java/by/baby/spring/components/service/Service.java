@@ -9,10 +9,10 @@ public interface Service<T, V> {
 
     Optional<T> findById(V id);
 
-    T save(T dto);
+    Optional<T> save(T dto);
 
-    T update(T dto, V id);
+    Optional<T> update(T dto, V id);
 
-    void deleteById(V id);
+    boolean deleteById(V id);
 
 }

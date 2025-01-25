@@ -1,7 +1,7 @@
 package by.baby.spring.components.service;
 
 import by.baby.dto.PaymentDto;
-import by.baby.exception.UnableToUpdateException;
+import by.baby.exception.NotFoundException;
 import by.baby.spring.components.mapper.PaymentDtoMapper;
 import by.baby.spring.components.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
@@ -34,12 +34,12 @@ public class PaymentService implements by.baby.spring.components.service.Service
     }
 
     @Override
-    public PaymentDto save(PaymentDto dto) {
-        return paymentDtoMapper.mapToDto(paymentRepository.save(paymentDtoMapper.mapToEntity(dto)));
+    public Optional<PaymentDto> save(PaymentDto dto) {
+        return Optional.of(paymentDtoMapper.mapToDto(paymentRepository.save(paymentDtoMapper.mapToEntity(dto))));
     }
 
     @Override
-    public PaymentDto update(PaymentDto dto, Long id) {
+    public Optional<PaymentDto> update(PaymentDto dto, Long id) {
         return paymentRepository.findById(id)
                 .map(paymentEntity -> {
                     paymentEntity.setFromUser(paymentEntity.getFromUser());
@@ -49,12 +49,15 @@ public class PaymentService implements by.baby.spring.components.service.Service
                     return paymentEntity;
                 })
                 .map(paymentRepository::save)
-                .map(paymentDtoMapper::mapToDto)
-                .orElseThrow(() -> new UnableToUpdateException("Unable to update payment"));
+                .map(paymentDtoMapper::mapToDto);
     }
 
     @Override
-    public void deleteById(Long id) {
+    public boolean deleteById(Long id) {
+        if (!paymentRepository.existsById(id)) {
+            throw new NotFoundException("Payment with id " + id + " not found");
+        }
         paymentRepository.deleteById(id);
+        return paymentRepository.existsById(id);
     }
 }

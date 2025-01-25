@@ -68,7 +68,8 @@ public class UserServiceTest {
     public void shouldSaveSuccessfully() {
         UserDto userDto = userService.save(new UserDto(
                 "username", "authToken", 0L
-        ));
+        ))
+                .get();
         assertThat(userService.findById(userDto.getId())).isNotEmpty();
     }
 }

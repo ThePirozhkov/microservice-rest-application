@@ -1,10 +1,11 @@
 package by.baby.spring.components.service;
 
 import by.baby.dto.UserDto;
-import by.baby.exception.UnableToUpdateException;
+import by.baby.exception.NotFoundException;
 import by.baby.spring.components.mapper.UserDtoMapper;
 import by.baby.spring.components.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -35,26 +37,35 @@ public class UserService implements by.baby.spring.components.service.Service<Us
     }
 
     @Override
-    public UserDto save(UserDto dto) {
-        return userDtoMapper.mapToDto(userRepository.save(userDtoMapper.mapToEntity(dto)));
+    public Optional<UserDto> save(UserDto dto) {
+        return Optional.of(userDtoMapper.mapToDto(userRepository.save(userDtoMapper.mapToEntity(dto))));
     }
 
     @Override
-    public UserDto update(UserDto dto, Long id) {
+    public Optional<UserDto> update(UserDto dto, Long id) {
         return userRepository.findById(id)
                 .map(userEntity -> {
-                    userEntity.setUsername(dto.getUsername());
-                    userEntity.setAuthToken(dto.getAuthToken());
-                    userEntity.setMoney(dto.getMoney());
+                    if (dto.getUsername() != null) {
+                        userEntity.setUsername(dto.getUsername());
+                    }
+                    if (dto.getAuthToken() != null) {
+                        userEntity.setAuthToken(dto.getAuthToken());
+                    }
+                    if (dto.getMoney() != null) {
+                        userEntity.setMoney(dto.getMoney());
+                    }
                     return userEntity;
                 })
                 .map(userRepository::save)
-                .map(userDtoMapper::mapToDto)
-                .orElseThrow(() -> new UnableToUpdateException("Unable to update user"));
+                .map(userDtoMapper::mapToDto);
     }
 
     @Override
-    public void deleteById(Long id) {
+    public boolean deleteById(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new NotFoundException("User with id " + id + " not found");
+        }
         userRepository.deleteById(id);
+        return !userRepository.existsById(id);
     }
 }
