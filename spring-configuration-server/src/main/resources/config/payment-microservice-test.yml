@@ -1,9 +1,35 @@
 server:
   port: 0
 spring:
+  kafka:
+    bootstrap-servers: "localhost:9092,localhost:9094,localhost:9096"
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: "all"
+      retries: 10
+      properties:
+        retry:
+          backoff:
+            ms: 1000
+        delivery:
+          timeout:
+            ms: 10000
+        linger:
+          ms: 0
+        request:
+          timeout:
+            ms: 5000
+        enable:
+          idempotence: true
+        max:
+          in:
+            flight:
+              requests:
+                per:
+                  connection: 5
   jpa:
     properties:
-      hibernate:
         show_sql: true
         format_sql: true
         ddl-auto: "create-drop"

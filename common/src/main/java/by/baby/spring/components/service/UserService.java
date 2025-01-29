@@ -45,15 +45,12 @@ public class UserService implements by.baby.spring.components.service.Service<Us
     public Optional<UserDto> update(UserDto dto, Long id) {
         return userRepository.findById(id)
                 .map(userEntity -> {
-                    if (dto.getUsername() != null) {
+                    if (dto.getUsername() != null)
                         userEntity.setUsername(dto.getUsername());
-                    }
-                    if (dto.getAuthToken() != null) {
+                    if (dto.getAuthToken() != null)
                         userEntity.setAuthToken(dto.getAuthToken());
-                    }
-                    if (dto.getMoney() != null) {
+                    if (dto.getMoney() != null)
                         userEntity.setMoney(dto.getMoney());
-                    }
                     return userEntity;
                 })
                 .map(userRepository::save)

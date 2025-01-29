@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 @Setter
 @ToString
 public class CreatedPaymentEvent {
-    private String fromUserId;
-    private String toUserId;
+    private Long fromUserId;
+    private Long toUserId;
     private BigDecimal amount;
 }

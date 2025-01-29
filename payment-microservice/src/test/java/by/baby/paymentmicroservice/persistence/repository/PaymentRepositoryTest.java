@@ -4,7 +4,6 @@ import by.baby.entity.PaymentEntity;
 import by.baby.entity.UserEntity;
 import by.baby.spring.components.repository.PaymentRepository;
 import by.baby.spring.components.repository.UserRepository;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -12,6 +11,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @Transactional
@@ -36,12 +38,16 @@ public class PaymentRepositoryTest {
         user2.setMoney(0L);
         userRepository.save(user2);
         PaymentEntity testPayment = new PaymentEntity();
+        testPayment.setId(UUID.randomUUID().toString());
         testPayment.setFromUser(user1);
         testPayment.setToUser(user2);
         testPayment.setAmount(new BigDecimal(1000L));
         paymentRepository.saveAndFlush(testPayment);
         PaymentEntity retrievedPayment = paymentRepository.findById(testPayment.getId())
                 .orElseThrow(RuntimeException::new);
-        Assertions.assertEquals(testPayment, retrievedPayment);
+        assertThat(retrievedPayment)
+                .usingRecursiveComparison()
+                .ignoringFields("paymentDate")
+                .isEqualTo(testPayment);
     }
 }

@@ -3,14 +3,12 @@ package by.baby.paymentmicroservice.configuration;
 import by.baby.event.CreatedPaymentEvent;
 import jakarta.persistence.EntityManagerFactory;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.Serializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
@@ -100,14 +98,5 @@ public class KafkaConfiguration {
         return new KafkaTemplate<>(producerFactory());
     }
 
-    @Bean
-    NewTopic paymentCreatedEventsTopic() {
-        return TopicBuilder
-                .name("payment-created-events-topic")
-                .partitions(3)
-                .replicas(3)
-                .config("min.insync.replicas", "2")
-                .build();
-    }
 
 }

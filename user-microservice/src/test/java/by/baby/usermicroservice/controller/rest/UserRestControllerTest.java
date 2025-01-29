@@ -5,7 +5,6 @@ import by.baby.dto.UserDto;
 import by.baby.spring.components.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -18,11 +17,10 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
+import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Slf4j
 @SpringBootTest
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
@@ -38,12 +36,12 @@ public class UserRestControllerTest {
         this.user1.setUsername("user1");
         this.user1.setAuthToken("authtoken1");
         this.user1.setMoney(0L);
-        this.user1.setCreatedAt(new Date());
+        this.user1.setCreatedAt(Instant.now());
         userRepository.saveAndFlush(user1);
         this.user2.setUsername("user2");
         this.user2.setAuthToken("authtoken2");
         this.user2.setMoney(0L);
-        this.user2.setCreatedAt(new Date());
+        this.user2.setCreatedAt(Instant.now());
         userRepository.saveAndFlush(user2);
     }
 
@@ -105,7 +103,6 @@ public class UserRestControllerTest {
                 "updateUserUsername", "authTokenUpdateUserTest", 0L
         );
         String jsonUpdUserDto = objectMapper.writeValueAsString(updUser);
-        log.info(userRepository.findAll().toString());
         mockMvc.perform(MockMvcRequestBuilders.put("/user/" + user1.getId())
                         .content(jsonUpdUserDto)
                         .contentType(MediaType.APPLICATION_JSON))
@@ -140,7 +137,6 @@ public class UserRestControllerTest {
     @SneakyThrows
     @Test
     public void shouldGetUserNotFoundExceptionForDelete() {
-        log.info(userRepository.findAll().toString());
         mockMvc.perform(MockMvcRequestBuilders.delete("/user/9999"))
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
     }

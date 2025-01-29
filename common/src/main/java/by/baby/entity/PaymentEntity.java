@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.Instant;
 
 @Entity
 @Getter
@@ -18,20 +18,24 @@ public class PaymentEntity {
     private String id;
 
     @ManyToOne
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private UserEntity fromUser;
 
     @ManyToOne
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private UserEntity toUser;
 
     @Column(nullable = false)
     private BigDecimal amount;
 
     @Column(nullable = false)
-    private Date paymentDate;
+    private Instant paymentDate;
 
     @PrePersist
     private void onCreate() {
-        this.paymentDate = new Date();
+        this.paymentDate = Instant.now();
     }
 
 }

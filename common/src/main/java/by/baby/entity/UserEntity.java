@@ -4,8 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.Check;
 
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -30,13 +30,15 @@ public class UserEntity {
     private Long money;
 
     @Column(nullable = false)
-    private Date createdAt;
+    private Instant createdAt;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<PaymentEntity> payments = new ArrayList<>();
 
     @PrePersist
     private void prePersist() {
-        this.createdAt = new Date();
+        this.createdAt = Instant.now();
     }
 }

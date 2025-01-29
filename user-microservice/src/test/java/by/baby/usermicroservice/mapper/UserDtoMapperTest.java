@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.Date;
+import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -27,14 +27,14 @@ public class UserDtoMapperTest {
         userEntity.setUsername("username");
         userEntity.setAuthToken("authToken");
         userEntity.setMoney(0L);
-        userEntity.setCreatedAt(new Date());
+        userEntity.setCreatedAt(Instant.now());
         assertThat(userDtoMapper.mapToDto(userEntity)).isNotNull();
     }
 
     @Test
     public void shouldMapDtoToEntitySuccessfully() {
         UserDto userDto = new UserDto(
-                1L, "username", "authToken", 0L, new Date()
+                1L, "username", "authToken", 0L, Instant.now()
         );
         assertThat(userDtoMapper.mapToEntity(userDto)).isNotNull();
     }

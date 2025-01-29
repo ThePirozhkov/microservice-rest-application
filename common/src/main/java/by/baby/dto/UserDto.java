@@ -3,17 +3,16 @@ package by.baby.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-import java.util.Date;
+import java.time.Instant;
 
 @AllArgsConstructor
 @Getter
 @Setter
 @NoArgsConstructor
+@ToString
+@EqualsAndHashCode
 public final class UserDto {
 
     public UserDto(String username, String authToken, Long money) {
@@ -30,6 +29,6 @@ public final class UserDto {
     @NotNull
     @PositiveOrZero
     private Long money;
-    private Date createdAt;
+    private Instant createdAt;
 
 }

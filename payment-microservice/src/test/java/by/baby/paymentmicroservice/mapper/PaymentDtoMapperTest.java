@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -26,15 +26,15 @@ public class PaymentDtoMapperTest {
     @Test
     public void shouldMapDtoToEntitySuccessfully() {
         PaymentDto paymentDto = new PaymentDto(
-                1L,
+                "1",
                 new UserDto(
-                        1L, "username", "authToken", 0L, new Date()
+                        1L, "username", "authToken", 0L, Instant.now()
                 ),
                 new UserDto(
-                        2L, "username2", "authToken2", 0L, new Date()
+                        2L, "username2", "authToken2", 0L, Instant.now()
                 ),
                 new BigDecimal(100L),
-                new Date()
+                Instant.now()
         );
         assertThat(paymentDtoMapper.mapToEntity(paymentDto)).isNotNull();
     }
@@ -46,20 +46,20 @@ public class PaymentDtoMapperTest {
         userEntity1.setUsername("username1");
         userEntity1.setAuthToken("authToken1");
         userEntity1.setMoney(0L);
-        userEntity1.setCreatedAt(new Date());
+        userEntity1.setCreatedAt(Instant.now());
         UserEntity userEntity2 = new UserEntity();
         userEntity2.setId(2L);
         userEntity2.setUsername("username2");
         userEntity2.setAuthToken("authToken2");
         userEntity2.setMoney(0L);
-        userEntity2.setCreatedAt(new Date());
+        userEntity2.setCreatedAt(Instant.now());
 
         PaymentEntity paymentEntity = new PaymentEntity();
-        paymentEntity.setId(1L);
+        paymentEntity.setId("1");
         paymentEntity.setFromUser(userEntity1);
         paymentEntity.setToUser(userEntity2);
         paymentEntity.setAmount(new BigDecimal(100L));
-        paymentEntity.setPaymentDate(new Date());
+        paymentEntity.setPaymentDate(Instant.now());
         assertThat(paymentDtoMapper.mapToDto(paymentEntity)).isNotNull();
     }
 
