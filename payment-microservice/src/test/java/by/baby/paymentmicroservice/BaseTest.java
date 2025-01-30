@@ -16,14 +16,6 @@ import org.testcontainers.utility.DockerImageName;
 @Testcontainers
 public class BaseTest {
 
-//    @Container
-//    static KafkaContainer kafkaContainer = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:latest")
-//            .asCompatibleSubstituteFor("apache/kafka"))
-//            .withExposedPorts(9092)
-//            .waitingFor(Wait.forLogMessage(".*[KafkaServer id=\\d+].* started.*",1))
-//            .waitingFor(Wait.forListeningPort())
-//            .withStartupTimeout(Duration.ofSeconds(120));
-
     @Container
     static KafkaContainer kafkaContainer =
             new KafkaContainer(DockerImageName.parse("apache/kafka:latest"));

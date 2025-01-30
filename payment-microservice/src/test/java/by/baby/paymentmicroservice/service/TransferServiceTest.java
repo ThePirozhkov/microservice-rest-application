@@ -4,24 +4,29 @@ import by.baby.event.CreatedPaymentEvent;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.*;
+import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.Node;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.TopicPartitionInfo;
+import org.apache.kafka.common.serialization.StringDeserializer;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Bean;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Transactional;
-import org.testcontainers.containers.Network;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.utility.DockerImageName;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -45,50 +50,21 @@ public class TransferServiceTest {
 
     private static List<KafkaContainer> kafkaContainers;
 
+    private static final CreatedPaymentEvent createdPaymentEvent =
+            new CreatedPaymentEvent(1L, 2L, new BigDecimal(1000L));
+
     @SneakyThrows
     @BeforeAll
     public static void setUp() {
-        Network network = Network.newNetwork();
 
-          kafkaContainers = IntStream.range(0, BROKER_COUNT)
-                .mapToObj(i -> new KafkaContainer(DockerImageName.parse("apache/kafka:latest"))
-                        .withNetwork(network)
-                        .withNetworkAliases("kafka-" + i))
+        kafkaContainers = IntStream.range(0, BROKER_COUNT)
+                .mapToObj(_ -> new KafkaContainer(DockerImageName.parse("apache/kafka:latest")))
                 .peek(KafkaContainer::start)
                 .toList();
 
-        await().atMost(30, TimeUnit.SECONDS).until(() -> {
-            try {
-                return kafkaContainers.getFirst().getBootstrapServers() != null;
-            } catch (Exception e) {
-                return false;
-            }
-        });
+        waitForBrokerReady();
 
-        kafkaContainers.forEach(k -> log.info("Kafka broker: {}", k.getBootstrapServers()));
-
-
-        try (AdminClient adminClient = AdminClient.create(Map.of(
-                AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG,
-                String.join(",", kafkaContainers.stream()
-                        .map(KafkaContainer::getBootstrapServers)
-                        .toList())))) {
-
-            await().atMost(30, TimeUnit.SECONDS).until(() -> {
-                try {
-                    Set<String> brokers = adminClient.describeCluster().nodes().get()
-                            .stream().map(Node::idString).collect(Collectors.toSet());
-                    log.info("Kafka cluster nodes: {}", brokers);
-                    return !brokers.isEmpty();  // Дождаться всех брокеров
-                } catch (Exception e) {
-                    return false;
-                }
-            });
-
-            log.info("Kafka cluster полностью сформирован.");
-        } catch (Exception e) {
-            log.error("Ошибка при ожидании кластера Kafka", e);
-        }
+        waitForClusterReady();
 
         try (AdminClient adminClient = AdminClient.create(Map.of(
                 AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaContainers.getFirst().getBootstrapServers()
@@ -97,9 +73,23 @@ public class TransferServiceTest {
             adminClient.createTopics(List.of(topic)).all().get();
         }
 
-        waitForKafkaReady();
+        waitForTopicReady();
 
     }
+
+    @Bean
+    public Map<String, Object> kafkaConsumerConfigs() {
+        Map<String, Object> props = new HashMap<>();
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaContainers.getFirst().getBootstrapServers());
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, "payment-created-events");
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
+        return props;
+    }
+
+    KafkaConsumer<String, String> consumer = new KafkaConsumer<>(kafkaConsumerConfigs());
 
     @DynamicPropertySource
     public static void kafkaProperties(DynamicPropertyRegistry registry) {
@@ -111,27 +101,43 @@ public class TransferServiceTest {
         log.error("Properties: {}", registry);
     }
 
-    private static void waitForKafkaReady() {
+    private static void waitForBrokerReady() {
+        await().atMost(30, TimeUnit.SECONDS).until(() -> {
+            try {
+                return kafkaContainers.getFirst().getBootstrapServers() != null;
+            } catch (Exception e) {
+                return false;
+            }
+        });
+
+        kafkaContainers.forEach(k -> log.info("Kafka broker: {}", k.getBootstrapServers()));
+    }
+
+    private static void waitForClusterReady() {
         try (AdminClient adminClient = AdminClient.create(Map.of(
-                AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaContainers.getFirst().getBootstrapServers()))) {
+                AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG,
+                String.join(",", kafkaContainers.stream()
+                        .map(KafkaContainer::getBootstrapServers)
+                        .toList())))) {
 
             await().atMost(30, TimeUnit.SECONDS).until(() -> {
                 try {
-                    return !adminClient.listTopics().names().get().isEmpty();
+                    Set<String> brokers = adminClient.describeCluster().nodes().get()
+                            .stream().map(Node::idString).collect(Collectors.toSet());
+                    log.info("Kafka cluster nodes: {}", brokers);
+                    return !brokers.isEmpty();
                 } catch (Exception e) {
                     return false;
                 }
             });
 
-            log.info("Kafka готов к работе.");
+            log.info("Kafka cluster полностью сформирован.");
         } catch (Exception e) {
-            log.error("Ошибка при ожидании Kafka", e);
+            log.error("Ошибка при ожидании кластера Kafka", e);
         }
     }
 
-    @SneakyThrows
-    @Test
-    public void testKafkaCluster() {
+    private static void waitForTopicReady() {
         await().atMost(15, TimeUnit.SECONDS).until(() -> {
             try (AdminClient adminClient = AdminClient.create(Map.of(
                     AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaContainers.getFirst().getBootstrapServers()
@@ -140,25 +146,41 @@ public class TransferServiceTest {
                 return adminClient.listTopics().names().get().contains(TOPIC);
             }
         });
+    }
 
-        kafkaTemplate.send(TOPIC, "testKey", new CreatedPaymentEvent(1L, 2L, new BigDecimal(1000L)));
+    private void checkTopic() {
+        consumer.subscribe(Collections.singletonList(TOPIC));
+        await().atMost(5, TimeUnit.SECONDS)
+                .until(() -> {
+                    var records = consumer.poll(Duration.ofMillis(1000L));
+                    records.forEach(record ->
+                            System.out.printf("Consumed record with key: %s, value: %s%n", record.key(), record.value()));
+                    return !records.isEmpty();
+                });
+    }
 
-        await().atMost(5, TimeUnit.SECONDS).until(() -> true); // здесь необходимо добавить ожидание обработки сообщения
+    @SneakyThrows
+    @Test
+    public void testKafkaCluster() {
 
+        kafkaTemplate.send(TOPIC, "testKey", createdPaymentEvent);
 
         try (AdminClient adminClient = AdminClient.create(Map.of(
                 AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaContainers.getFirst().getBootstrapServers()))) {
+
             DescribeTopicsResult topicsResult = adminClient.describeTopics(Collections.singletonList(TOPIC));
-            TopicDescription topicDescription = topicsResult.all().get().get(TOPIC);
+            TopicDescription topicDescription = topicsResult.allTopicNames().get().get(TOPIC);
 
             Map<TopicPartition, OffsetSpec> request = new HashMap<>();
             for (TopicPartitionInfo partitionInfo : topicDescription.partitions()) {
                 request.put(new TopicPartition(TOPIC, partitionInfo.partition()), OffsetSpec.latest());
             }
 
+            checkTopic();
+
             ListOffsetsResult offsetsResult = adminClient.listOffsets(request);
             offsetsResult.all().get().forEach((tp, result) ->
-                    System.out.println("Партиция " + tp.partition() + " содержит " + result.offset() + " сообщений"));
+                    log.info("Партиция " + tp.partition() + " содержит " + result.offset() + " сообщений"));
         }
     }
 
