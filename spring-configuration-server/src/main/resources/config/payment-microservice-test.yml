@@ -14,7 +14,7 @@ spring:
             ms: 1000
         delivery:
           timeout:
-            ms: 10000
+            ms: 60000
         linger:
           ms: 0
         request:
