@@ -58,7 +58,7 @@ public class TransferServiceTest {
     public static void setUp() {
 
         kafkaContainers = IntStream.range(0, BROKER_COUNT)
-                .mapToObj(_ -> new KafkaContainer(DockerImageName.parse("apache/kafka:latest")))
+                .mapToObj(x -> new KafkaContainer(DockerImageName.parse("apache/kafka:latest")))
                 .peek(KafkaContainer::start)
                 .toList();
 
@@ -67,7 +67,7 @@ public class TransferServiceTest {
         waitForClusterReady();
 
         try (AdminClient adminClient = AdminClient.create(Map.of(
-                AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaContainers.getFirst().getBootstrapServers()
+                AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaContainers.get(0).getBootstrapServers()
         ))) {
             NewTopic topic = new NewTopic(TOPIC, 3, (short) 1);
             adminClient.createTopics(List.of(topic)).all().get();
@@ -80,7 +80,7 @@ public class TransferServiceTest {
     @Bean
     public Map<String, Object> kafkaConsumerConfigs() {
         Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaContainers.getFirst().getBootstrapServers());
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaContainers.get(0).getBootstrapServers());
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "payment-created-events");
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
@@ -104,7 +104,7 @@ public class TransferServiceTest {
     private static void waitForBrokerReady() {
         await().atMost(30, TimeUnit.SECONDS).until(() -> {
             try {
-                return kafkaContainers.getFirst().getBootstrapServers() != null;
+                return kafkaContainers.get(0).getBootstrapServers() != null;
             } catch (Exception e) {
                 return false;
             }
@@ -140,7 +140,7 @@ public class TransferServiceTest {
     private static void waitForTopicReady() {
         await().atMost(15, TimeUnit.SECONDS).until(() -> {
             try (AdminClient adminClient = AdminClient.create(Map.of(
-                    AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaContainers.getFirst().getBootstrapServers()
+                    AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaContainers.get(0).getBootstrapServers()
             ))) {
                 log.info(adminClient.listTopics().names().get().toString());
                 return adminClient.listTopics().names().get().contains(TOPIC);
@@ -166,7 +166,7 @@ public class TransferServiceTest {
         kafkaTemplate.send(TOPIC, "testKey", createdPaymentEvent);
 
         try (AdminClient adminClient = AdminClient.create(Map.of(
-                AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaContainers.getFirst().getBootstrapServers()))) {
+                AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaContainers.get(0).getBootstrapServers()))) {
 
             DescribeTopicsResult topicsResult = adminClient.describeTopics(Collections.singletonList(TOPIC));
             TopicDescription topicDescription = topicsResult.allTopicNames().get().get(TOPIC);
@@ -180,7 +180,7 @@ public class TransferServiceTest {
 
             ListOffsetsResult offsetsResult = adminClient.listOffsets(request);
             offsetsResult.all().get().forEach((tp, result) ->
-                    log.info("Партиция " + tp.partition() + " содержит " + result.offset() + " сообщений"));
+                    log.info("Партиция {} содержит {} сообщений", tp.partition(), result.offset()));
         }
     }
 

@@ -80,24 +80,8 @@ public class PaymentServiceTest extends BaseTest {
         assertThat(paymentService.findById(payment1.getId())).isNotEmpty();
     }
 
-    @Order(3)
-    @Test
-    public void shouldSavePaymentSuccessfully() {
-        PaymentDto paymentDto = new PaymentDto();
-        paymentDto.setId(UUID.randomUUID() + "testing");
-        paymentDto.setFromUser(
-                userDtoMapper.mapToDto(user1)
-        );
-        paymentDto.setToUser(
-                userDtoMapper.mapToDto(user2)
-        );
-        paymentDto.setAmount(new BigDecimal("100.00"));
-        paymentService.save(paymentDto);
-        assertThat(paymentService.findById(paymentDto.getId())).isNotEmpty();
-    }
-
     @SneakyThrows
-    @Order(4)
+    @Order(3)
     @Test
     public void shouldUpdatePaymentSuccessfully() {
         PaymentDto updDto = new PaymentDto();
@@ -117,7 +101,7 @@ public class PaymentServiceTest extends BaseTest {
                 .isEqualTo(expDto);
     }
 
-    @Order(5)
+    @Order(4)
     @Test
     public void shouldDeletePaymentSuccessfully() {
         if (paymentRepository.existsById(payment1.getId())) {

@@ -4,7 +4,9 @@ import by.baby.dto.PaymentDto;
 import by.baby.exception.NotFoundException;
 import by.baby.spring.components.mapper.PaymentDtoMapper;
 import by.baby.spring.components.repository.PaymentRepository;
+import jdk.jshell.spi.ExecutionControl;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,9 +37,10 @@ public class PaymentService implements by.baby.spring.components.service.Service
                 .map(paymentDtoMapper::mapToDto);
     }
 
+    @SneakyThrows
     @Override
     public Optional<PaymentDto> save(PaymentDto dto) {
-        return Optional.of(paymentDtoMapper.mapToDto(paymentRepository.save(paymentDtoMapper.mapToEntity(dto))));
+        throw new ExecutionControl.NotImplementedException("Method not implemented");
     }
 
     @Override
