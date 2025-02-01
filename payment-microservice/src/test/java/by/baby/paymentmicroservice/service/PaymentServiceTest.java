@@ -83,6 +83,7 @@ public class PaymentServiceTest extends BaseTest {
     @SneakyThrows
     @Order(3)
     @Test
+    //TODO Сделать обновление через Kafka!
     public void shouldUpdatePaymentSuccessfully() {
         PaymentDto updDto = new PaymentDto();
         updDto.setAmount(new BigDecimal("100.99"));
@@ -103,6 +104,7 @@ public class PaymentServiceTest extends BaseTest {
 
     @Order(4)
     @Test
+    //TODO Сделать удаление через Kafka!
     public void shouldDeletePaymentSuccessfully() {
         if (paymentRepository.existsById(payment1.getId())) {
             paymentRepository.deleteById(payment1.getId());

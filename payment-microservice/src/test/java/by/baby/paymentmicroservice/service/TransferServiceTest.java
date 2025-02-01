@@ -53,6 +53,29 @@ public class TransferServiceTest {
     private static final CreatedPaymentEvent createdPaymentEvent =
             new CreatedPaymentEvent(1L, 2L, new BigDecimal(1000L));
 
+    @Autowired
+    private KafkaConsumer<String, CreatedPaymentEvent> consumer;
+
+    @org.springframework.boot.test.context.TestConfiguration
+    static class TestConfiguration {
+        @Bean
+        public Map<String, Object> kafkaConsumerConfigs() {
+            Map<String, Object> props = new HashMap<>();
+            props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaContainers.get(0).getBootstrapServers());
+            props.put(ConsumerConfig.GROUP_ID_CONFIG, "payment-created-events");
+            props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
+            props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+            props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+            props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
+            return props;
+        }
+
+        @Bean
+        public KafkaConsumer<String, CreatedPaymentEvent> kafkaConsumer() {
+            return new KafkaConsumer<>(kafkaConsumerConfigs());
+        }
+    }
+
     @SneakyThrows
     @BeforeAll
     public static void setUp() {
@@ -77,20 +100,6 @@ public class TransferServiceTest {
 
     }
 
-    @Bean
-    public Map<String, Object> kafkaConsumerConfigs() {
-        Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaContainers.get(0).getBootstrapServers());
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, "payment-created-events");
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-        props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
-        return props;
-    }
-
-    KafkaConsumer<String, String> consumer = new KafkaConsumer<>(kafkaConsumerConfigs());
-
     @DynamicPropertySource
     public static void kafkaProperties(DynamicPropertyRegistry registry) {
         List<String> brokers = kafkaContainers.stream()
@@ -98,7 +107,6 @@ public class TransferServiceTest {
                 .collect(Collectors.toList());
         registry.add("spring.kafka.bootstrap-servers", () -> String.join(",", brokers));
         log.error("Kafka brokers: {}", brokers);
-        log.error("Properties: {}", registry);
     }
 
     private static void waitForBrokerReady() {
@@ -161,7 +169,7 @@ public class TransferServiceTest {
 
     @SneakyThrows
     @Test
-    public void testKafkaCluster() {
+    public void sendMessage_shouldBeConsumeMessageSuccessfully() {
 
         kafkaTemplate.send(TOPIC, "testKey", createdPaymentEvent);
 
