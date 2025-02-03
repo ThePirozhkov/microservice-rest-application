@@ -13,7 +13,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @ToString
 @EqualsAndHashCode
-public final class UserDto {
+public final class UserDto implements Dto {
 
     public UserDto(String username, String authToken, Long money) {
         this.money = money;

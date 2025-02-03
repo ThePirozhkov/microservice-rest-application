@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 @AllArgsConstructor
-final public class CreatedPaymentDto {
+final public class CreatedPaymentDto implements Dto {
 
     @NotNull
     @Positive

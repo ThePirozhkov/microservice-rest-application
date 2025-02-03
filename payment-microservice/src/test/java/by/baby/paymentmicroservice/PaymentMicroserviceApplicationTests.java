@@ -6,7 +6,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 @SpringBootTest(classes = PaymentMicroserviceApplication.class)
 @ActiveProfiles("test")
-class PaymentMicroserviceApplicationTests {
+public class PaymentMicroserviceApplicationTests {
 
     @Test
     void contextLoads() {

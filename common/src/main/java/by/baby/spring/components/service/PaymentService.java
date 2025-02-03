@@ -1,6 +1,8 @@
 package by.baby.spring.components.service;
 
+import by.baby.dto.CreatedPaymentDto;
 import by.baby.dto.PaymentDto;
+import by.baby.event.CreatedPaymentEvent;
 import by.baby.exception.NotFoundException;
 import by.baby.spring.components.mapper.PaymentDtoMapper;
 import by.baby.spring.components.repository.PaymentRepository;
@@ -8,11 +10,14 @@ import jdk.jshell.spi.ExecutionControl;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -23,6 +28,7 @@ public class PaymentService implements by.baby.spring.components.service.Service
 
     private final PaymentRepository paymentRepository;
     private final PaymentDtoMapper paymentDtoMapper;
+    private final KafkaTemplate<String, CreatedPaymentEvent> kafkaTemplate;
 
     @Override
     public List<PaymentDto> findAll() {
@@ -40,7 +46,35 @@ public class PaymentService implements by.baby.spring.components.service.Service
     @SneakyThrows
     @Override
     public Optional<PaymentDto> save(PaymentDto dto) {
-        throw new ExecutionControl.NotImplementedException("Method not implemented");
+        throw new ExecutionControl.NotImplementedException("Method not implemented / Use transfer method");
+    }
+
+    public String transfer(CreatedPaymentDto createdPaymentDto) {
+        try {
+            log.info("Transfer started with data: \n{}", createdPaymentDto);
+            CreatedPaymentEvent event = new CreatedPaymentEvent(
+                    createdPaymentDto.getFromUserId(), createdPaymentDto.getToUserId(), createdPaymentDto.getAmount()
+            );
+            ProducerRecord<String, CreatedPaymentEvent> record = new ProducerRecord<>(
+                    "payment-created-events-topic", UUID.randomUUID().toString(), event
+            );
+
+            String recordMessageId = UUID.randomUUID().toString();
+            record.headers().add("messageId", recordMessageId.getBytes());
+
+            kafkaTemplate.send(record)
+                    .whenComplete((result, error) -> {
+                        if (error != null) {
+                            log.error("Transfer error: ", error);
+                        } else {
+                            log.info("Transfer succeeded with id {}", recordMessageId);
+                        }
+                    });
+        } catch (Exception e) {
+            log.error("Transfer exception: ", e);
+            throw new RuntimeException(e);
+        }
+        return "Transfer processed successfully";
     }
 
     @Override

@@ -3,66 +3,41 @@ package by.baby.paymentmicroservice.controller;
 import by.baby.dto.CreatedPaymentDto;
 import by.baby.entity.PaymentEntity;
 import by.baby.entity.UserEntity;
+import by.baby.paymentmicroservice.KafkaTest;
 import by.baby.spring.components.repository.PaymentRepository;
 import by.baby.spring.components.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.admin.*;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.common.TopicPartition;
-import org.apache.kafka.common.TopicPartitionInfo;
-import org.apache.kafka.common.serialization.StringDeserializer;
-import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
-import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
-import org.testcontainers.kafka.KafkaContainer;
-import org.testcontainers.utility.DockerImageName;
 
 import java.math.BigDecimal;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
-import static org.awaitility.Awaitility.await;
 
 @Slf4j
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
 @ActiveProfiles("test")
-public class PaymentRestControllerTest {
+public class PaymentRestControllerTest extends KafkaTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
     private UserRepository userRepository;
-
-    private static final KafkaContainer kafkaContainer =
-            new KafkaContainer(DockerImageName.parse("apache/kafka"));
-
-    private static final String TOPIC = "payment-created-events-topic";
-    private static AdminClient adminClient;
-
-    @Autowired
-    private KafkaConsumer<String, String> consumer;
 
     private final UserEntity user1 = new UserEntity();
     private final UserEntity user2 = new UserEntity();
@@ -73,77 +48,6 @@ public class PaymentRestControllerTest {
     private PaymentRepository paymentRepository;
     @Autowired
     private ObjectMapper objectMapper;
-
-    @org.springframework.boot.test.context.TestConfiguration
-    static class TestConfiguration {
-        @Bean
-        public Map<String, Object> kafkaConsumerConfigs() {
-            Map<String, Object> props = new HashMap<>();
-            props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaContainer.getBootstrapServers());
-            props.put(ConsumerConfig.GROUP_ID_CONFIG, "payment-created-events");
-            props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-            props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
-            props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-            props.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
-            return props;
-        }
-
-        @Bean
-        public KafkaConsumer<String, String> kafkaConsumer() {
-            return new KafkaConsumer<>(kafkaConsumerConfigs());
-        }
-    }
-
-    @SneakyThrows
-    @BeforeAll
-    public static void setup1() {
-        kafkaContainer.start();
-
-        waitForBrokerReady();
-
-        adminClient = AdminClient.create(Map.of(
-                AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaContainer.getBootstrapServers()));
-
-            NewTopic topic = new NewTopic(TOPIC, 3, (short) 1);
-            adminClient.createTopics(List.of(topic)).all().get();
-
-        waitForTopicReady();
-    }
-
-    private static void waitForBrokerReady() {
-        await().atMost(30, TimeUnit.SECONDS).until(() -> {
-            try {
-                return kafkaContainer.getBootstrapServers() != null;
-            } catch (Exception e) {
-                return false;
-            }
-        });
-
-        log.info("Kafka broker-{} is ready", kafkaContainer.getBootstrapServers());
-    }
-
-    private static void waitForTopicReady() {
-        await().atMost(15, TimeUnit.SECONDS).until(() -> {
-            log.info(adminClient.listTopics().names().get().toString());
-            return adminClient.listTopics().names().get().contains(TOPIC);
-        });
-    }
-
-    @DynamicPropertySource
-    public static void kafkaProperties(@NotNull DynamicPropertyRegistry registry) {
-        registry.add("spring.kafka.bootstrap-servers", kafkaContainer::getBootstrapServers);
-    }
-
-    private void checkTopic() {
-        consumer.subscribe(Collections.singletonList(TOPIC));
-        await().atMost(5, TimeUnit.SECONDS)
-                .until(() -> {
-                    var records = consumer.poll(Duration.ofMillis(1000L));
-                    records.forEach(record ->
-                            System.out.printf("Consumed record with key: %s, value: %s%n", record.key(), record.value()));
-                    return !records.isEmpty();
-                });
-    }
 
     @BeforeEach
     public void setup2() {
@@ -202,11 +106,12 @@ public class PaymentRestControllerTest {
                         .andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
-
-    //TODO тест не дописан нужны тесты TransferService и интеграционный тест Kafka!
     @SneakyThrows
     @Test
     public void shouldCreatePaymentSuccessfully() {
+
+        startTopic("payment-created-events-topic", 3);
+
         CreatedPaymentDto createdPaymentDto = new CreatedPaymentDto(
                 user1.getId(), user2.getId(), new BigDecimal(1488L)
         );
@@ -216,19 +121,6 @@ public class PaymentRestControllerTest {
                 .content(jsonUpdDto))
                 .andExpect(MockMvcResultMatchers.status().isCreated());
 
-        DescribeTopicsResult topicsResult = adminClient.describeTopics(Collections.singletonList(TOPIC));
-        TopicDescription topicDescription = topicsResult.allTopicNames().get().get(TOPIC);
-
-        Map<TopicPartition, OffsetSpec> request = new HashMap<>();
-        for (TopicPartitionInfo partitionInfo : topicDescription.partitions()) {
-            request.put(new TopicPartition(TOPIC, partitionInfo.partition()), OffsetSpec.latest());
-        }
-
-        checkTopic();
-
-        ListOffsetsResult offsetsResult = adminClient.listOffsets(request);
-        offsetsResult.all().get().forEach((tp, result) ->
-                log.info("Партиция {} содержит {} сообщений", tp.partition(), result.offset()));
-
+        checkTopic("payment-created-events-topic");
     }
 }

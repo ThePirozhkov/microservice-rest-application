@@ -2,7 +2,6 @@ package by.baby.paymentmicroservice.controller.rest;
 
 import by.baby.dto.CreatedPaymentDto;
 import by.baby.exception.NotFoundException;
-import by.baby.paymentmicroservice.service.TransferService;
 import by.baby.spring.components.service.PaymentService;
 import by.baby.util.HttpResponseBuilder;
 import jakarta.validation.Valid;
@@ -21,7 +20,6 @@ import java.util.*;
 @RequiredArgsConstructor
 public class PaymentRestController {
 
-    private final TransferService transferService;
     private final PaymentService paymentService;
 
     @PostMapping
@@ -31,7 +29,7 @@ public class PaymentRestController {
             return HttpResponseBuilder.buildErrorResponse(bindingResult, HttpStatus.BAD_REQUEST);
         }
         LinkedHashMap<String, Object> response = new LinkedHashMap<>();
-        response.put("message", transferService.transfer(createdPaymentDto));
+        response.put("message", paymentService.transfer(createdPaymentDto));
         response.put("senderId", createdPaymentDto.getFromUserId());
         response.put("receiverId", createdPaymentDto.getToUserId());
         response.put("amount", createdPaymentDto.getAmount());

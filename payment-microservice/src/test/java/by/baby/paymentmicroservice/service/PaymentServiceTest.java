@@ -1,18 +1,19 @@
 package by.baby.paymentmicroservice.service;
 
+import by.baby.dto.CreatedPaymentDto;
 import by.baby.dto.PaymentDto;
 import by.baby.entity.PaymentEntity;
 import by.baby.entity.UserEntity;
-import by.baby.paymentmicroservice.BaseTest;
+import by.baby.paymentmicroservice.KafkaTest;
 import by.baby.spring.components.mapper.UserDtoMapper;
 import by.baby.spring.components.repository.PaymentRepository;
 import by.baby.spring.components.repository.UserRepository;
 import by.baby.spring.components.service.PaymentService;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,8 +27,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ActiveProfiles("test")
 @Transactional
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@DirtiesContext
-public class PaymentServiceTest extends BaseTest {
+@Slf4j
+public class PaymentServiceTest extends KafkaTest {
 
     @Autowired
     private UserRepository userRepository;
@@ -80,8 +81,20 @@ public class PaymentServiceTest extends BaseTest {
         assertThat(paymentService.findById(payment1.getId())).isNotEmpty();
     }
 
-    @SneakyThrows
     @Order(3)
+    @Test
+    public void sendMessage_shouldBeConsumeMessageSuccessfully() {
+        startTopic("payment-created-events-topic", 3);
+
+        paymentService.transfer(
+                new CreatedPaymentDto(1L, 2L, new BigDecimal("100.00"))
+        );
+
+        checkTopic("payment-created-events-topic");
+    }
+
+    @SneakyThrows
+    @Order(4)
     @Test
     //TODO Сделать обновление через Kafka!
     public void shouldUpdatePaymentSuccessfully() {
@@ -102,7 +115,7 @@ public class PaymentServiceTest extends BaseTest {
                 .isEqualTo(expDto);
     }
 
-    @Order(4)
+    @Order(5)
     @Test
     //TODO Сделать удаление через Kafka!
     public void shouldDeletePaymentSuccessfully() {

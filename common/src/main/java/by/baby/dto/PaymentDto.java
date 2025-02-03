@@ -11,7 +11,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @ToString
 @EqualsAndHashCode
-final public class PaymentDto {
+final public class PaymentDto implements Dto {
 
     private String id;
     private UserDto fromUser;
